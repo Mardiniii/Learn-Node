@@ -2,13 +2,13 @@ const express = require('express');
 const router = express.Router();
 const storeController = require('../controllers/storeController');
 const userController = require('../controllers/userController');
-// Just to import one method from the imported file
+const authController = require('../controllers/authController');// Just to import one method from the imported file
 const { catchErrors } = require('../handlers/errorHandlers')
 
 // Do work here
 router.get('/', catchErrors(storeController.getStores));
 router.get('/stores', catchErrors(storeController.getStores));
-router.get('/add', storeController.addStore);
+router.get('/add', authController.isLoggedIn, storeController.addStore);
 // Async/Await with function composition for errors catching
 router.post('/add',
   storeController.upload,
@@ -28,7 +28,17 @@ router.get('/tags', catchErrors(storeController.getStoresByTag));
 router.get('/tags/:tag', catchErrors(storeController.getStoresByTag));
 
 router.get('/login', userController.loginForm);
+router.post('/login', authController.login);
 router.get('/register', userController.registerForm);
-router.post('/register', userController.validateRegister);
+// 1. Validate user registration data
+// 2. Saving data to the database
+// 3. Log in the new user
+router.post('/register',
+  userController.validateRegister,
+  userController.register,
+  authController.login
+);
+
+router.get('/logout', authController.logout)
 
 module.exports = router;
