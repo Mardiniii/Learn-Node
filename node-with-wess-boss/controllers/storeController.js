@@ -30,6 +30,7 @@ exports.upload = multer(multerOptions).single('photo');
 exports.resize = async (req, res, next) => {
   if (!req.file) {
     next(); // Skip to the next middleware
+    return;
   }
   // Trust in the mimetype
   const extension = req.file.mimetype.split('/')[1];
@@ -127,6 +128,10 @@ exports.mapStores = async (req, res) => {
     }
   };
 
-  const stores = await Store.find(q).select('slug name description location').limit(10);
+  const stores = await Store.find(q).select('slug name description location photo').limit(10);
   res.json(stores);
 };
+
+exports.mapPage = (req, res) => {
+  res.render('map', { title: 'Map' });
+}
