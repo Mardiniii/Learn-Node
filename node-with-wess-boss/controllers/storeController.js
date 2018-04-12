@@ -91,3 +91,42 @@ exports.getStoresByTag = async (req, res) => {
 
   res.render('tag', { tags, title: 'Tags', tag, stores });
 }
+
+exports.searchStores = async (req, res) => {
+  const stores = await Store
+  // Find stores that match
+  .find({
+    $text: {
+      $search: req.query.q
+    }
+  }, {
+    score: {
+      $meta: 'textScore'
+    }
+  })
+  // Sort stores by textScore
+  .sort({
+    score: { $meta: 'textScore' }
+  })
+  // Limit to only 5 results
+  .limit(5);
+  res.json(stores);
+};
+
+exports.mapStores = async (req, res) => {
+  const coordinates = [req.query.lng, req.query.lat].map(parseFloat);
+  const q = {
+    location: {
+      $near: {
+        $geometry: {
+          type: 'Point',
+          coordinates
+        },
+        $maxDistance: 10000 // 10 km
+      }
+    }
+  };
+
+  const stores = await Store.find(q).select('slug name description location').limit(10);
+  res.json(stores);
+};

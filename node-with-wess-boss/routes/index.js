@@ -48,4 +48,10 @@ router.post('/account/reset/:token',
   catchErrors(authController.update)
 );
 
+/*
+  API
+*/
+
+router.get('/api/search', catchErrors(storeController.searchStores));
+router.get('/api/search/near', catchErrors(storeController.mapStores));
 module.exports = router;
